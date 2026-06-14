@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Generator Kartu MABA ITS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF1F8;
+    --panel:#FFFFFF;
+    --ink:#232838;
+    --muted:#8A90A6;
+    --border:#E3E6F0;
+  }
+
+  *{box-sizing:border-box;}
+
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background-color:var(--bg);
+    background-image:radial-gradient(circle,#DCE1F0 1px,transparent 1px);
+    background-size:22px 22px;
+    color:var(--ink);
+    min-height:100vh;
+    padding:48px 20px;
+  }
+
+  .page-head{max-width:900px;margin:0 auto 36px;text-align:center;}
+  .page-head .eyebrow{
+    font-family:'Space Grotesk',sans-serif;font-size:.7rem;letter-spacing:.25em;
+    text-transform:uppercase;color:#7C85A6;font-weight:700;
+  }
+  .page-head h1{
+    font-family:'Space Grotesk',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);
+    font-weight:800;margin:10px 0 8px;
+  }
+  .page-head p{color:var(--muted);font-size:.95rem;margin:0;}
+  .layout{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start;}
+  @media (max-width:840px){.layout{grid-template-columns:1fr;}}
+
+  .panel{
+    background:var(--panel);border-radius:20px;padding:28px;
+    box-shadow:0 12px 30px rgba(30,40,80,.06);border:1px solid var(--border);
+  }
+  .field-group{margin-bottom:20px;}
+  .field-group:last-child{margin-bottom:0;}
+  .field-group>label{
+    display:block;font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:700;
+    letter-spacing:.18em;text-transform:uppercase;color:#7C85A6;margin-bottom:8px;
+  }
+
+  input[type=text]{
+    width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;
+    font-size:.95rem;font-family:'Inter',sans-serif;color:var(--ink);background:#FBFCFE;
+  }
+  input[type=text]::placeholder{color:#B7BCCC;}
+  input[type=text]:focus-visible{outline:2px solid #9FB1FF;outline-offset:1px;border-color:#9FB1FF;background:#fff;}
+
+  .file-input{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .file-btn{
+    display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;
+    border:1.5px dashed var(--border);background:#FBFCFE;font-family:'Space Grotesk',sans-serif;
+    font-weight:600;font-size:.85rem;color:#5B6480;cursor:pointer;white-space:nowrap;transition:.15s;
+  }
+  .file-btn:hover{border-color:#9FB1FF;color:#3D4A80;}
+  .file-name{font-size:.8rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px;}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;}
+  input[type=file]:focus-visible + .file-btn,
+  .file-btn:focus-within{outline:2px solid #9FB1FF;outline-offset:2px;}
+
+  .theme-toggle{display:flex;gap:10px;}
+  .theme-btn{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;
+    border-radius:10px;border:1.5px solid var(--border);background:#FBFCFE;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.85rem;color:#5B6480;
+    cursor:pointer;transition:.15s;
+  }
+  .theme-btn:focus-visible{outline:2px solid #9FB1FF;outline-offset:2px;}
+  .swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+  .swatch.pink{background:linear-gradient(135deg,#FF6FA0,#FFC2DC);}
+  .swatch.blue{background:linear-gradient(135deg,#2F6BFF,#7FD4FF);}
+  .theme-btn.active[data-theme="pink"]{border-color:#FF9CC0;background:#FFEFF5;color:#D6457E;}
+  .theme-btn.active[data-theme="blue"]{border-color:#9CC2FF;background:#EEF4FF;color:#2257D6;}
+
+  .download-btn{
+    width:100%;margin-top:8px;padding:14px;border:none;border-radius:12px;background:var(--ink);
+    color:#fff;font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.95rem;
+    letter-spacing:.04em;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    gap:10px;transition:.15s;
+  }
+  .download-btn:hover{background:#3B4266;}
+  .download-btn:disabled{opacity:.6;cursor:wait;}
+  .download-btn:focus-visible{outline:2px solid #9FB1FF;outline-offset:2px;}
+
+  .preview-panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:48px 24px;}
+  .preview-panel .preview-label{
+    font-family:'Space Grotesk',sans-serif;font-size:.7rem;letter-spacing:.25em;
+    text-transform:uppercase;color:#7C85A6;font-weight:700;
+  }
+
+  .id-card{
+    width:min(420px,100%);aspect-ratio:8/5;border-radius:18px;overflow:hidden;position:relative;
+    display:flex;flex-direction:column;font-family:'Inter',sans-serif;color:#232838;
+    background:#FBF6ED;box-shadow:0 24px 50px rgba(30,40,90,.18);transition:transform .25s;
+  }
+  .id-card:hover{transform:translateY(-4px);}
+  @media (prefers-reduced-motion:reduce){.id-card{transition:none;}.id-card:hover{transform:none;}}
+
+  .id-card.theme-pink{--accent-1:#FF6FA0;--accent-2:#FFC2DC;--pattern:rgba(255,111,160,.14);}
+  .id-card.theme-blue{--accent-1:#2F6BFF;--accent-2:#7FD4FF;--pattern:rgba(47,107,255,.14);}
+
+  .card-grid{
+    position:absolute;inset:0;
+    background-image:radial-gradient(circle,var(--pattern) 1.4px,transparent 1.4px);
+    background-size:16px 16px;
+  }
+
+  .card-header{
+    position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-start;
+    padding:14px 16px 12px;background:linear-gradient(120deg,var(--accent-1),var(--accent-2));color:#fff;
+  }
+  .card-title-main{font-family:'Space Grotesk',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:.03em;line-height:1.15;}
+  .card-title-sub{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;opacity:.85;margin-top:4px;font-weight:600;}
+  .card-badge{
+    width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.18);
+    border:1.5px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:.62rem;color:#fff;
+    flex-shrink:0;text-align:center;line-height:1.1;
+  }
+
+  .card-body{position:relative;z-index:1;flex:1;display:flex;gap:16px;padding:16px;align-items:center;}
+  .card-photo{
+    width:30%;aspect-ratio:3/4;border-radius:12px;border:2px solid var(--accent-1);background:#fff;
+    overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  }
+  .card-photo img{width:100%;height:100%;object-fit:cover;display:none;}
+  .card-photo svg{width:42%;height:42%;color:#D3D7E4;}
+
+  .card-fields{flex:1;display:flex;flex-direction:column;gap:10px;min-width:0;}
+  .field-row .field-label{
+    display:block;font-family:'Space Grotesk',sans-serif;font-size:.6rem;letter-spacing:.18em;
+    text-transform:uppercase;font-weight:700;color:var(--accent-1);
+  }
+  .field-row .field-value{display:block;font-size:.95rem;font-weight:600;margin-top:2px;word-break:break-word;color:#232838;}
+  .field-row .field-value.empty{color:#C3C8D6;font-weight:500;}
+
+  .card-footer{
+    position:relative;z-index:1;display:flex;align-items:center;justify-content:space-between;
+    padding:10px 16px;background:linear-gradient(120deg,var(--accent-2),var(--accent-1));
+  }
+  .barcode{
+    width:42%;height:18px;
+    background:repeating-linear-gradient(90deg,#fff 0 2px,transparent 2px 4px,#fff 4px 7px,transparent 7px 8px,#fff 8px 11px,transparent 11px 13px,#fff 13px 14px,transparent 14px 17px,#fff 17px 20px,transparent 20px 22px);
+    opacity:.9;
+  }
+  .footer-text{font-family:'Space Grotesk',sans-serif;font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;color:#fff;font-weight:700;white-space:nowrap;}
+
+  @media (max-width:420px){
+    .card-title-main{font-size:.85rem;}
+    .card-title-sub{font-size:.45rem;}
+    .field-row .field-value{font-size:.78rem;}
+    .field-row .field-label{font-size:.5rem;}
+    .footer-text{font-size:.45rem;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="page-head">
+    <div class="eyebrow">FE Task · Kartu Profil Maba</div>
+    <h1>Generator Kartu Profil MABA ITS</h1>
+    <p>Isi data kamu, pilih warna kartu, lalu unduh hasilnya sebagai gambar PNG.</p>
+  </div>
+
+  <div class="layout">
+
+    <!-- FORM -->
+    <div class="panel form-panel">
+
+      <div class="field-group">
+        <label for="input-foto">Foto</label>
+        <div class="file-input">
+          <input type="file" id="input-foto" accept="image/*">
+          <label class="file-btn" for="input-foto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+            Pilih Foto
+          </label>
+          <span class="file-name" id="file-name">Belum ada file</span>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="input-nama">Nama</label>
+        <input type="text" id="input-nama" placeholder="Nama lengkap">
+      </div>
+
+      <div class="field-group">
+        <label for="input-nrp">NRP</label>
+        <input type="text" id="input-nrp" placeholder="contoh: 5025221234">
+      </div>
+
+      <div class="field-group">
+        <label for="input-gugus">Gugus</label>
+        <input type="text" id="input-gugus" placeholder="contoh: 12">
+      </div>
+
+      <div class="field-group">
+        <label>Warna Kartu</label>
+        <div class="theme-toggle">
+          <button type="button" class="theme-btn active" data-theme="pink"><span class="swatch pink"></span>Pink</button>
+          <button type="button" class="theme-btn" data-theme="blue"><span class="swatch blue"></span>Biru</button>
+        </div>
+      </div>
+
+      <button class="download-btn" id="btn-download">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+        <span id="btn-download-label">Download Kartu</span>
+      </button>
+    </div>
+
+    <!-- PREVIEW -->
+    <div class="panel preview-panel">
+      <span class="preview-label">Preview</span>
+
+      <div class="id-card theme-pink" id="id-card">
+        <div class="card-grid"></div>
+
+        <div class="card-header">
+          <div>
+            <div class="card-title-main">KARTU PROFIL MABA</div>
+            <div class="card-title-sub">Institut Teknologi Sepuluh Nopember</div>
+          </div>
+          <div class="card-badge">2026</div>
+        </div>
+
+        <div class="card-body">
+          <div class="card-photo" id="card-photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+            <img id="card-photo-img" alt="Foto MABA">
+          </div>
+          <div class="card-fields">
+            <div class="field-row">
+              <span class="field-label">Nama</span>
+              <span class="field-value empty" id="preview-nama">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">NRP</span>
+              <span class="field-value empty" id="preview-nrp">—</span>
+            </div>
+            <div class="field-row">
+              <span class="field-label">Gugus</span>
+              <span class="field-value empty" id="preview-gugus">—</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <div class="barcode"></div>
+          <span class="footer-text">MABA ITS 2026</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+  // Foto upload
+  const inputFoto = document.getElementById('input-foto');
+  const fileName = document.getElementById('file-name');
+  const cardPhotoImg = document.getElementById('card-photo-img');
+  const cardPhotoIcon = document.querySelector('#card-photo svg');
+
+  inputFoto.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    fileName.textContent = file.name;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      cardPhotoImg.src = ev.target.result;
+      cardPhotoImg.style.display = 'block';
+      cardPhotoIcon.style.display = 'none';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // Text fields binding
+  function bindText(inputId, previewId) {
+    const input = document.getElementById(inputId);
+    const preview = document.getElementById(previewId);
+    input.addEventListener('input', () => {
+      const val = input.value.trim();
+      if (val) {
+        preview.textContent = val;
+        preview.classList.remove('empty');
+      } else {
+        preview.textContent = '—';
+        preview.classList.add('empty');
+      }
+    });
+  }
+  bindText('input-nama', 'preview-nama');
+  bindText('input-nrp', 'preview-nrp');
+  bindText('input-gugus', 'preview-gugus');
+
+  // Theme toggle
+  const card = document.getElementById('id-card');
+  document.querySelectorAll('.theme-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.theme-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      card.classList.remove('theme-pink', 'theme-blue');
+      card.classList.add('theme-' + btn.dataset.theme);
+    });
+  });
+
+  // Download as PNG
+  const downloadBtn = document.getElementById('btn-download');
+  const downloadLabel = document.getElementById('btn-download-label');
+
+  downloadBtn.addEventListener('click', () => {
+    downloadBtn.disabled = true;
+    const prevLabel = downloadLabel.textContent;
+    downloadLabel.textContent = 'Memproses...';
+
+    html2canvas(card, { scale: 3, backgroundColor: null, useCORS: true }).then((canvas) => {
+      const namaVal = document.getElementById('input-nama').value.trim() || 'maba-its';
+      const safeName = namaVal.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const link = document.createElement('a');
+      link.download = `kartu-maba-its-${safeName}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }).finally(() => {
+      downloadBtn.disabled = false;
+      downloadLabel.textContent = prevLabel;
+    });
+  });
+</script>
+
+</body>
+</html>
